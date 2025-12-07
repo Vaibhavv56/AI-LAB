@@ -1873,7 +1873,7 @@ int main() {
 }
 
 Routing 
-//2
+//1
 #include <bits/stdc++.h>
 using namespace std;
 
@@ -2246,4 +2246,619 @@ int main() {
     cout << "\nTotal States Explored = " << states << endl;
     return 0;
 }
+
+
+PROLOG
+FAMILY-TREE
+/* ===== Simple Family Tree ===== */
+
+% --- Gender ---
+male(john).
+male(david).
+male(sam).
+
+female(mary).
+female(susan).
+female(anu).
+
+% --- Parent(Parent, Child) ---
+parent(john, david).
+parent(john, susan).
+parent(mary, david).
+parent(mary, susan).
+
+parent(david, sam).
+parent(anu, sam).
+
+/* ===== Rules ===== */
+
+% Father / Mother
+father(X, Y) :-
+    male(X),
+    parent(X, Y).
+
+mother(X, Y) :-
+    female(X),
+    parent(X, Y).
+
+% Siblings
+sibling(X, Y) :-
+    parent(P, X),
+    parent(P, Y),
+    X \= Y.
+
+brother(X, Y) :-
+    male(X),
+    sibling(X, Y).
+
+sister(X, Y) :-
+    female(X),
+    sibling(X, Y).
+
+% Grandparent
+grandparent(X, Y) :-
+    parent(X, Z),
+    parent(Z, Y).
+
+% Uncle / Aunt
+uncle(X, Y) :-
+    brother(X, P),
+    parent(P, Y).
+
+aunt(X, Y) :-
+    sister(X, P),
+    parent(P, Y).
+
+% Ancestor
+ancestor(X, Y) :-
+    parent(X, Y).
+ancestor(X, Y) :-
+    parent(X, Z),
+    ancestor(Z, Y).
+
+
+Vegetable
+/* ====== Small Fruit / Vegetable KB ====== */
+
+% --- BASIC FACTS ---
+
+% fruit/1
+fruit(apple).
+fruit(orange).
+
+% vegetable/1
+vegetable(carrot).
+vegetable(spinach).
+
+% --- PROPERTIES ---
+
+% color(Item, Color).
+color(apple,   red).
+color(orange,  orange).
+color(carrot,  orange).
+color(spinach, green).
+
+% taste(Item, Taste).
+taste(apple,   sweet).
+taste(orange,  sour).
+taste(carrot,  mild_sweet).
+taste(spinach, bitter).
+
+% grows_on(Item, Part).
+% tree, plant, root, leafy
+grows_on(apple,   tree).
+grows_on(orange,  tree).
+grows_on(carrot,  root).
+grows_on(spinach, leafy).
+
+% seeds_inside(Item, yes/no).
+seeds_inside(apple,  yes).
+seeds_inside(orange, yes).
+seeds_inside(carrot, no).
+seeds_inside(spinach,no).
+
+/* ====== CLASSIFICATION RULES ====== */
+
+is_fruit(X) :-
+    fruit(X).
+
+is_vegetable(X) :-
+    vegetable(X).
+
+% Root / leafy
+root_vegetable(X) :-
+    vegetable(X),
+    grows_on(X, root).
+
+leafy_vegetable(X) :-
+    vegetable(X),
+    grows_on(X, leafy).
+
+% Citrus fruits
+citrus_fruit(X) :-
+    fruit(X),
+    (X = orange).
+
+% Sweet fruits
+sweet_fruit(X) :-
+    fruit(X),
+    taste(X, sweet).
+
+% Green vegetables
+green_vegetable(X) :-
+    vegetable(X),
+    color(X, green).
+
+% General produce
+produce(X) :-
+    fruit(X);
+    vegetable(X).
+
+
+Bird
+/* ===== Small Bird Knowledge Base ===== */
+
+% --- Basic birds ---
+bird(sparrow).
+bird(eagle).
+bird(penguin).
+bird(duck).
+
+% --- Abilities ---
+can_fly(sparrow).
+can_fly(eagle).
+can_fly(duck).
+
+cannot_fly(penguin).
+
+% --- Habitat ---
+aquatic(duck).
+aquatic(penguin).
+
+% --- Diet ---
+carnivore(eagle).
+carnivore(penguin).
+omnivore(sparrow).
+omnivore(duck).
+
+/* ===== Classification Rules ===== */
+
+flying_bird(X) :-
+    bird(X),
+    can_fly(X).
+
+non_flying_bird(X) :-
+    bird(X),
+    cannot_fly(X).
+
+aquatic_bird(X) :-
+    bird(X),
+    aquatic(X).
+
+predator_bird(X) :-
+    bird(X),
+    carnivore(X).
+
+omnivore_bird(X) :-
+    bird(X),
+    omnivore(X).
+
+can_fly_classify(X) :-
+    bird(X),
+    can_fly(X),
+    write(X), write(' can fly.'), nl.
+
+can_fly_classify(X) :-
+    bird(X),
+    cannot_fly(X),
+    write(X), write(' cannot fly.'),nl.
+
+Vehicle
+/* ====== Small Vehicle Knowledge Base ====== */
+
+% ---- BASIC VEHICLES ----
+vehicle(car).
+vehicle(bike).
+vehicle(bus).
+vehicle(boat).
+
+% ---- WHEELS ----
+wheels(car, 4).
+wheels(bike, 2).
+wheels(bus, 6).
+wheels(boat, 0).
+
+% ---- MEDIUM ----
+% road, water
+medium(car, road).
+medium(bike, road).
+medium(bus, road).
+medium(boat, water).
+
+% ---- ENGINE ----
+engine(car, yes).
+engine(bike, yes).
+engine(bus, yes).
+engine(boat, yes).
+
+% ---- FUEL ----
+fuel(car, petrol).
+fuel(bike, petrol).
+fuel(bus, diesel).
+fuel(boat, diesel).
+
+% ---- USAGE ----
+usage(car, personal).
+usage(bike, personal).
+usage(bus, public_transport).
+usage(boat, goods).
+
+/* ====== CLASSIFICATION RULES ====== */
+
+road_vehicle(V) :-
+    vehicle(V),
+    medium(V, road).
+
+water_vehicle(V) :-
+    vehicle(V),
+    medium(V, water).
+
+motor_vehicle(V) :-
+    vehicle(V),
+    engine(V, yes).
+
+two_wheeler(V) :-
+    vehicle(V),
+    wheels(V, 2).
+
+four_wheeler(V) :-
+    vehicle(V),
+    wheels(V, 4).
+
+personal_vehicle(V) :-
+    vehicle(V),
+    usage(V, personal).
+
+public_transport_vehicle(V) :-
+    vehicle(V),
+    usage(V, public_transport).
+
+goods_vehicle(V) :-
+    vehicle(V),
+    usage(V, goods).
+
+EXPERT SYSTEM 
+ANIMAL IDENTIFICATION
+% ===== Simple Animal Expert System (Short Version) =====
+
+:- dynamic known/2.
+
+start :-
+    retractall(known(_, _)),
+    writeln('=== Animal Expert System ==='),
+    writeln('Answer with yes. or no.'),
+    nl,
+    (   animal(Animal)
+    ->  format('I think the animal is: ~w~n', [Animal])
+    ;   writeln('Sorry, I could not identify the animal.')
+    ),
+    nl.
+
+% ------------ Animal rules ------------
+
+animal(tiger) :-
+    mammal,
+    carnivore,
+    has_stripes.
+
+animal(lion) :-
+    mammal,
+    carnivore,
+    has_mane.
+
+animal(elephant) :-
+    mammal,
+    herbivore,
+    very_large,
+    has_trunk.
+
+animal(dog) :-
+    mammal,
+    carnivore,
+    domestic,
+    barks.
+
+animal(cat) :-
+    mammal,
+    carnivore,
+    domestic,
+    meows.
+
+animal(eagle) :-
+    bird,
+    carnivore,
+    flies.
+
+% ------------ Category rules ------------
+
+mammal  :- ask(has_hair).
+bird    :- ask(has_feathers).
+
+carnivore   :- ask(eats_meat).
+herbivore   :- ask(eats_plants).
+
+has_stripes :- ask(has_stripes).
+has_mane    :- ask(has_mane).
+has_trunk   :- ask(has_trunk).
+very_large  :- ask(is_very_large).
+domestic    :- ask(is_domestic).
+barks       :- ask(barks).
+meows       :- ask(meows).
+flies       :- ask(can_fly).
+
+% ------------ Asking / memory ------------
+
+ask(Prop) :-
+    known(Prop, yes), !.
+
+ask(Prop) :-
+    known(Prop, no), !, fail.
+
+ask(Prop) :-
+    format('Does the animal have property "~w"? (yes/no): ', [Prop]),
+    read(Ans),
+    ( Ans == yes
+    -> assertz(known(Prop, yes))
+    ;  assertz(known(Prop, no)), fail
+).
+
+
+DISEASE CLASSIFICATION
+
+
+
+:- dynamic(known/1).       % Facts for symptoms user has
+:- dynamic(not_known/1).   % Facts for symptoms user does NOT have
+
+% Ask the user about a symptom
+ask(Symptom) :-
+    known(Symptom), !.
+ask(Symptom) :-
+    not_known(Symptom), !, fail.
+ask(Symptom) :-
+    format('Do you have ~w? (yes/no): ', [Symptom]),
+    read(Response),
+    nl,
+    ( Response == yes -> assertz(known(Symptom));
+      assertz(not_known(Symptom)), fail ).
+
+% Check if user has the symptom
+has_symptom(S) :- ask(S).
+
+% Knowledge Base: Symptoms of diseases
+symptom(flu, fever).
+symptom(flu, head_ache).
+symptom(flu, runny_nose).
+
+symptom(cold, cough).
+symptom(cold, sneezing).
+symptom(cold, runny_nose).
+
+
+% Rule: Disease is diagnosed if all its symptoms are present
+disease(D) :-
+    symptom(D, _),
+    \+ (symptom(D, S), \+ has_symptom(S)).
+
+% Start the expert system
+start :-
+    retractall(known(_)),
+    retractall(not_known(_)),
+    write('--- Simple Medical Expert System ---'), nl,
+    write('Answer the following questions:'), nl, nl,
+    (   disease(D) ->
+        format('You may have ~w.~n', [D]);
+        write('Sorry, no diagnosis could be made based on the given symptoms.'), nl
+    ),
+    write('--- End ---'), nl.
+
+FAMILY TREE
+% Gender facts
+male(john).
+male(david).
+male(raj).
+
+female(mary).
+female(susan).
+female(rita).
+
+% Parent relationships
+parent(john, mary).
+parent(john, david).
+parent(mary, susan).
+parent(mary, raj).
+parent(rita, mary).
+
+% X is the father of Y if X is male and X is a parent of Y
+father(X, Y) :- male(X), parent(X, Y).
+
+% X is the mother of Y if X is female and X is a parent of Y
+mother(X, Y) :- female(X), parent(X, Y).
+
+% X is grandparent of Y if X is parent of Z and Z is parent of Y
+grandparent(X, Y) :- parent(X, Z), parent(Z, Y).
+
+% X is sibling of Y if they share the same parent and are not the same person
+sibling(X, Y) :- parent(Z, X), parent(Z, Y), X \= Y.
+
+% brother and sister
+brother(X, Y) :- male(X), sibling(X, Y).
+sister(X, Y) :- female(X),sibling(X, Y).
+
+===============================================================2code=======================
+% --- Facts ---
+father(john, david).
+father(john, emma).
+mother(susan, david).
+mother(susan, emma).
+
+father(david, lily).
+mother(anna, lily).
+
+% --- Rules ---
+parent(X,Y) :- father(X,Y).
+parent(X,Y) :- mother(X,Y).
+
+sibling(X,Y) :- parent(P,X), parent(P,Y), X \= Y.
+
+grandfather(X,Y) :- father(X,Z), parent(Z,Y).
+grandmother(X,Y) :- mother(X,Z), parent(Z,Y).
+
+% --- Helper to check relationships ---
+check_relation(father, X, Y) :- father(X,Y).
+check_relation(mother, X, Y) :- mother(X,Y).
+check_relation(sibling, X, Y) :- sibling(X,Y).
+check_relation(grandfather, X, Y) :- grandfather(X,Y).
+check_relation(grandmother, X, Y) :- grandmother(X,Y).
+
+% --- Start Expert System ---
+start :-
+    write('--- Family Tree Expert System ---'), nl,
+    write('Answer names in lowercase, ending with a period (e.g., john.)'), nl,
+    write('Which relationship do you want to check? (father/mother/sibling/grandfather/grandmother)'), nl,
+    read(Rel),
+    write('Enter the first person: '), read(P1),
+    write('Enter the second person: '), read(P2),
+    (   check_relation(Rel, P1, P2)
+    ->  write('Yes, the relationship exists.'), nl
+    ;   write('No such relationship found.'), nl
+).
+
+SENTIMENT ANALYSIS
+:- dynamic has/1.   % Allow adding/removing facts during runtime
+
+% ---- Knowledge Base ----
+feature(positive, happy).
+feature(positive, joyful).
+feature(positive, excited).
+feature(positive, wonderful).
+feature(positive, pleasant).
+
+feature(negative, sad).
+feature(negative, angry).
+feature(negative, terrible).
+feature(negative, horrible).
+feature(negative, disappointed).
+
+feature(neutral, okay).
+feature(neutral, average).
+feature(neutral, fine).
+feature(neutral, normal).
+feature(neutral, unsure).
+
+% ---- Ask user about emotion words ----
+ask(Feature) :-
+    format('Do you feel ~w? (yes/no): ', [Feature]),
+    read(Response),
+    (Response == yes -> assert(has(Feature)) ; true).
+
+% ---- Check if all features of sentiment are present ----
+has_all_features(Sentiment) :-
+    feature(Sentiment, Feature),
+    \+ has(Feature),
+    !, fail.
+has_all_features(_).
+
+% ---- Identify sentiment ----
+analyze(Sentiment) :-
+    feature(Sentiment, _),
+    has_all_features(Sentiment).
+
+% ---- Start the Expert System ----
+start :-
+    retractall(has(_)),  % clear previous responses
+    write('--- Sentiment Analysis Expert System ---'), nl,
+    write('Answer the following questions with yes. or no.'), nl,
+    forall(feature(_, F), (ask(F))),
+    (analyze(S) ->
+        format('Your sentiment appears to be ~w.~n', [S])
+    ;
+        write('No clear sentiment identified based on your responses.'), nl).
+
+
+SKILL-SET-JOB
+% ============================
+% Short Skillset–Job Matching ES
+% ============================
+
+:- dynamic known/3.
+
+start :-
+    writeln('=== Skillset – Job Matching Expert System ==='),
+    writeln('Answer with yes. / no.'),
+    nl,
+    reset_answers,
+    findall(JobId, fits(JobId), Jobs),
+    nl,
+    (   Jobs == []
+    ->  writeln('No matching job found based on your current skills.')
+    ;   writeln('Based on your skills, you may be suitable for:'),
+        print_jobs(Jobs)
+    ),
+    nl,
+    writeln('Thank you for using the expert system !').
+
+% -------- Jobs (reduced) --------
+
+job(web_dev,        'Web Developer').
+job(data_scientist, 'Data Scientist').
+job(sys_admin,      'System Administrator').
+
+required_skills(web_dev,
+    [ html, css, javascript ]).
+
+required_skills(data_scientist,
+    [ python, statistics, sql ]).
+
+required_skills(sys_admin,
+    [ linux, networking_basics, troubleshooting ]).
+
+% -------- Matching rule --------
+
+fits(JobId) :-
+    required_skills(JobId, SkillList),
+    all_skills_present(SkillList).
+
+all_skills_present([]).
+all_skills_present([Skill | Rest]) :-
+    has_skill(Skill),
+    all_skills_present(Rest).
+
+% -------- Asking about skills --------
+
+has_skill(Skill) :-
+    known(yes, Skill, user), !.
+has_skill(Skill) :-
+    known(no, Skill, user), !, fail.
+has_skill(Skill) :-
+    ask_skill(Skill).
+
+ask_skill(Skill) :-
+    format('Do you have skill "~w"? (yes/no): ', [Skill]),
+    read(Response),
+    nl,
+    ( Response == yes ; Response == y ->
+        asserta(known(yes, Skill, user))
+    ;   asserta(known(no, Skill, user)), fail ).
+
+% -------- Utils --------
+
+reset_answers :-
+    retractall(known(_, _, _)).
+
+print_jobs([]).
+print_jobs([JobId | Rest]) :-
+    job(JobId, Name),
+    format('- ~w (~w)~n', [Name, JobId]),
+    print_jobs(Rest).
 
