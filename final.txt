@@ -1,0 +1,2249 @@
+Tic-Tac-Toe
+//ai
+#include <iostream>
+#include <vector>
+#include <climits>
+using namespace std;
+
+vector<int> board(9, 2);
+int userSymbol, aiSymbol;
+
+void printboard();
+void userMove();
+int checkWinner();
+bool isMovesLeft();
+int minimax(bool isMaximizing);
+int findBestMove();
+
+int main() {
+    cout << "For X: 3 and for O: 5\n";
+    cout << "Choose your symbol (3 for X / 5 for O): ";
+    cin >> userSymbol;
+
+    aiSymbol = (userSymbol == 3) ? 5 : 3;
+
+    printboard();
+
+    while (true) {
+        userMove();
+        printboard();
+
+        if (checkWinner() == userSymbol) {
+            cout << "\nYou win!!\n";
+            break;
+        }
+        if (!isMovesLeft()) {
+            cout << "\nIt's a draw!\n";
+            break;
+        }
+
+        cout << "\nComputer's move:\n";
+        int bestMove = findBestMove();
+        board[bestMove] = aiSymbol;
+        printboard();
+
+        if (checkWinner() == aiSymbol) {
+            cout << "\nComputer wins!!\n";
+            break;
+        }
+        if (!isMovesLeft()) {
+            cout << "\nIt's a draw!\n";
+            break;
+        }
+    }
+    return 0;
+}
+
+void userMove() {
+    int move;
+    do {
+        cout << "Enter your move (0 to 8): ";
+        cin >> move;
+    } while (move < 0 || move > 8 || board[move] != 2);
+
+    board[move] = userSymbol;
+}
+
+void printboard() {
+    for (int i = 0; i < 9; i++) {
+        char c = (board[i] == 3) ? 'X' : (board[i] == 5) ? 'O' : ' ';
+        cout << " " << c << " ";
+        if (i % 3 != 2) cout << "|";
+        if (i % 3 == 2 && i != 8) cout << "\n---+---+---\n";
+    }
+    cout << "\n\n";
+}
+
+int checkWinner() {
+    int lines[8][3] = {
+        {0,1,2}, {3,4,5}, {6,7,8},
+        {0,3,6}, {1,4,7}, {2,5,8},
+        {0,4,8}, {2,4,6}
+    };
+
+    for (auto &l : lines) {
+        if (board[l[0]] != 2 &&
+            board[l[0]] == board[l[1]] &&
+            board[l[1]] == board[l[2]])
+            return board[l[0]];
+    }
+    return 0;
+}
+
+bool isMovesLeft() {
+    for (int i : board)
+        if (i == 2) return true;
+    return false;
+}
+
+int minimax(bool isMaximizing) {
+    int winner = checkWinner();
+    if (winner == aiSymbol) return 10;
+    if (winner == userSymbol) return -10;
+    if (!isMovesLeft()) return 0;
+
+    if (isMaximizing) {
+        int best = INT_MIN;
+        for (int i = 0; i < 9; i++) {
+            if (board[i] == 2) {
+                board[i] = aiSymbol;
+                best = max(best, minimax(false)); //recursion
+                board[i] = 2;  //reset
+            }
+        }
+        return best;
+    }
+
+    int best = INT_MAX;
+    for (int i = 0; i < 9; i++) {
+        if (board[i] == 2) {
+            board[i] = userSymbol;
+            best = min(best, minimax(true));
+            board[i] = 2;
+        }
+    }
+    return best;
+}
+
+int findBestMove() {
+    int bestVal = INT_MIN;
+    int bestMove = -1;
+
+    for (int i = 0; i < 9; i++) {
+        if (board[i] == 2) {
+            board[i] = aiSymbol;
+            int moveVal = minimax(false);
+            board[i] = 2;
+            if (moveVal > bestVal) {
+                bestVal = moveVal;
+                bestMove = i;
+            }
+        }
+    }
+    return bestMove;
+}
+
+
+
+
+//non-ai
+#include <iostream>
+#include <vector>
+using namespace std;
+
+vector<int> board(9, 2);  
+int turn = 1;
+
+void user(int q);
+void printboard();
+void play(int turn);
+void Go(int n);
+int make2();
+int Posswin(int p);
+int checkWinner();
+
+int main() {
+    int q;
+    int winner = 0;
+
+    cout << "For X: 3 and for O: 5\n";
+    cout << "Choose your symbol (3 for X / 5 for O): ";
+    cin >> q;
+
+    for (int i = 0; i <= 9; i++) {
+        if (turn % 2 == 1) {
+            // Computer's turn
+            cout << "\nTurn = " << turn << " (Computer's move)\n";
+            play(turn);
+            printboard();
+
+            winner = checkWinner();
+            if (winner != 0) {
+                if (winner == q)
+                    cout << "\nYou win!!" << endl;
+                else
+                    cout << "\nComputer wins!!" << endl;
+                break;
+            }
+            turn++;
+        } else {
+            if (turn == 10) break;
+
+            // User's turn
+            user(q);
+            cout << "\nTurn = " << turn << " (Your move)\n";
+            printboard();
+
+            winner = checkWinner();
+            if (winner != 0) {
+                if (winner == q)
+                    cout << "\nYou win!!" << endl;
+                else
+                    cout << "\nComputer wins!!" << endl;
+                break;
+            }
+            turn++;
+        }
+    }
+
+    if (winner == 0) {
+        cout << "\nIt's a draw!" << endl;
+    }
+
+    return 0;
+}
+
+void user(int q) {
+    int move;
+    cout << "Enter your move (0 to 8): ";
+    cin >> move;
+
+    if (move >= 0 && move < 9 && board[move] == 2) {
+        board[move] = q;
+    } else {
+        cout << "Invalid move. Try again.\n";
+        user(q);
+    }
+}
+
+void printboard() {
+    for (int i = 0; i < 9; ++i) {
+        char cell = ' ';
+        if (board[i] == 3) cell = 'X';
+        else if (board[i] == 5) cell = 'O';
+
+        cout << " " << cell << " ";
+
+        if ((i + 1) % 3 != 0)
+            cout << "|";
+        else if (i != 8)
+            cout << "\n---+---+---\n";
+    }
+    cout << "\n";
+}
+
+int make2() {
+    if (board[4] == 2)
+        return 4;
+    return 1;
+}
+
+void Go(int n) {
+    if (turn % 2 == 0)
+        board[n] = 5;  
+    else
+        board[n] = 3;
+}
+
+int Posswin(int p) {
+    int winProd = (p == 3) ? 18 : 50;
+    int lines[8][3] = {
+        {0,1,2}, {3,4,5}, {6,7,8},
+        {0,3,6}, {1,4,7}, {2,5,8},
+        {0,4,8}, {2,4,6}
+    };
+
+    for (int i = 0; i < 8; ++i) {
+        int prod = board[lines[i][0]] * board[lines[i][1]] * board[lines[i][2]];
+        if (prod == winProd) {
+            for (int j = 0; j < 3; ++j) {
+                if (board[lines[i][j]] == 2)
+                    return lines[i][j];
+            }
+        }
+    }
+    return 0;
+}
+
+int checkWinner() {
+    int lines[8][3] = {
+        {0,1,2}, {3,4,5}, {6,7,8},
+        {0,3,6}, {1,4,7}, {2,5,8},
+        {0,4,8}, {2,4,6}
+    };
+
+    for (int i = 0; i < 8; ++i) {
+        int a = board[lines[i][0]];
+        int b = board[lines[i][1]];
+        int c = board[lines[i][2]];
+        if (a == b && b == c && a != 2)
+            return a;
+    }
+    return 0;
+}
+
+void play(int turn) {
+    if (turn == 1) {
+        Go(0);
+    } else if (turn == 2) {
+        if (board[4] == 2) Go(4);
+        else Go(0);
+    } else if (turn == 3) {
+        if (board[8] == 2) Go(8);
+        else Go(2);
+    } else if (turn == 4) {
+        int pos = Posswin(3);
+        if (pos != 0) Go(pos);
+        else Go(make2());
+    } else if (turn == 5) {
+        int pos = Posswin(3);
+        if (pos != 0) Go(pos);
+        else if ((pos = Posswin(5)) != 0) Go(pos);
+        else if (board[6] == 2) Go(6);
+        else Go(2);
+    } else if (turn == 6) {
+        int pos = Posswin(5);
+        if (pos != 0) Go(pos);
+        else if ((pos = Posswin(3)) != 0) Go(pos);
+        else Go(make2());
+    } else if (turn >= 7 && turn <= 9) {
+        int pos = Posswin(5);
+        if (pos != 0) Go(pos);
+        else if ((pos = Posswin(3)) != 0) Go(pos);
+        else {
+            for (int i = 0; i < 9; ++i) {
+                if (board[i] == 2) {
+                    Go(i);
+                    break;
+                }
+            }
+        }
+    }
+}
+
+
+
+MAZE PROBLEM : 
+#include <bits/stdc++.h>
+using namespace std;
+
+const int ROWS = 4;
+const int COLS = 4;
+
+// Maze: 0 = free, 1 = wall
+int maze[ROWS][COLS] = {
+    {0, 1, 0, 0},
+    {0, 0, 0, 1},
+    {1, 0, 1, 0},
+    {0, 0, 0, 0}
+
+};
+
+bool visited[ROWS][COLS];
+int dx[4] = {-1,1,0,0};
+int dy[4] = {0,0,-1,1};
+
+void printPath(vector<pair<int,int>> &path){
+    for(auto &p: path)
+        cout << "(" << p.first << "," << p.second << ") -> ";
+    cout << "END\n";
+}
+
+/* ================= BFS ================= */
+void BFS(int sx,int sy,int gx,int gy){
+    queue<pair<int,int>> q;
+    map<pair<int,int>,pair<int,int>> parent;
+    vector<pair<int,int>> traversal;
+    memset(visited,false,sizeof(visited));
+
+    q.push({sx,sy});
+    visited[sx][sy]=true;
+    parent[{sx,sy}]={-1,-1};
+
+    while(!q.empty()){
+        auto [x,y]=q.front(); q.pop();
+        traversal.push_back({x,y});
+
+        if(x==gx && y==gy){
+            cout<<"\nBFS Traversal Order:\n"; 
+            printPath(traversal);
+
+            vector<pair<int,int>> path;
+            pair<int,int> cur={gx,gy};
+            while(cur.first!=-1){
+                path.push_back(cur);
+                cur = parent[cur];
+            }
+            reverse(path.begin(),path.end());
+            cout<<"\nBFS Shortest Path:\n"; 
+            printPath(path);
+            return;
+        }
+
+        for(int i=0;i<4;i++){
+            int nx=x+dx[i], ny=y+dy[i];
+            if(nx>=0 && ny>=0 && nx<ROWS && ny<COLS && maze[nx][ny]==0 && !visited[nx][ny]){
+                visited[nx][ny]=true;
+                parent[{nx,ny}]={x,y};
+                q.push({nx,ny});
+            }
+        }
+    }
+    cout<<"No path found using BFS\n";
+}
+
+/* ================= DFS ================= */
+bool DFSUtil(int x,int y,int gx,int gy, vector<pair<int,int>> &path, vector<pair<int,int>> &traversal){
+    traversal.push_back({x,y});
+    if(x==gx && y==gy){ path.push_back({x,y}); return true; }
+
+    visited[x][y]=true;
+    path.push_back({x,y});
+
+    for(int i=0;i<4;i++){
+        int nx=x+dx[i], ny=y+dy[i];
+        if(nx>=0 && ny>=0 && nx<ROWS && ny<COLS && maze[nx][ny]==0 && !visited[nx][ny]){
+            if(DFSUtil(nx,ny,gx,gy,path,traversal)) return true;
+        }
+    }
+    path.pop_back();
+    return false;
+}
+
+void DFS(int sx,int sy,int gx,int gy){
+    memset(visited,false,sizeof(visited));
+    vector<pair<int,int>> path, traversal;
+    if(DFSUtil(sx,sy,gx,gy,path,traversal)){
+        cout<<"\nDFS Traversal Order:\n"; printPath(traversal);
+        cout<<"\nDFS Path:\n"; printPath(path);
+    } else cout<<"No path found using DFS\n";
+}
+
+/* ================= Heuristic ================= */
+int heuristic(int x,int y,int gx,int gy){
+    return abs(x-gx)+abs(y-gy); // Manhattan Distance
+}
+
+/* ================= Best-First Search ================= */
+struct NodeBFS {
+    int x,y,h;
+    bool operator<(const NodeBFS &other) const { return h > other.h; }
+};
+
+void BestFirst(int sx,int sy,int gx,int gy){
+    priority_queue<NodeBFS> pq;
+    vector<vector<bool>> visited(ROWS, vector<bool>(COLS,false));
+    vector<vector<pair<int,int>>> parent(ROWS, vector<pair<int,int>>(COLS,{-1,-1}));
+    vector<pair<int,int>> traversal;
+
+    pq.push({sx,sy,heuristic(sx,sy,gx,gy)});
+    visited[sx][sy]=true;
+
+    cout << "\n--- Best First Search (Printing Heuristic h) ---\n";
+
+    while(!pq.empty()){
+        NodeBFS cur=pq.top(); pq.pop();
+
+        cout << "Visiting (" << cur.x << "," << cur.y << ")  h=" << cur.h << "\n";
+
+        traversal.push_back({cur.x,cur.y});
+
+        if(cur.x==gx && cur.y==gy){
+            cout<<"\nBest-First Traversal Order:\n"; printPath(traversal);
+
+            vector<pair<int,int>> path;
+            int x=cur.x,y=cur.y;
+            while(x!=-1){
+                path.push_back({x,y});
+                auto p=parent[x][y]; x=p.first; y=p.second;
+            }
+            reverse(path.begin(),path.end());
+            cout<<"\nBest-First Path:\n"; printPath(path);
+            return;
+        }
+
+        for(int i=0;i<4;i++){
+            int nx=cur.x+dx[i], ny=cur.y+dy[i];
+            if(nx>=0 && ny>=0 && nx<ROWS && ny<COLS && maze[nx][ny]==0 && !visited[nx][ny]){
+                visited[nx][ny]=true;
+                parent[nx][ny]={cur.x,cur.y};
+                pq.push({nx,ny,heuristic(nx,ny,gx,gy)});
+            }
+        }
+    }
+    cout<<"No path found using Best-First\n";
+}
+
+/* ================= A* Search ================= */
+struct NodeAStar {
+    int x,y,g,h;
+    bool operator<(const NodeAStar &other) const { 
+        return g+h > other.g+other.h;
+    }
+};
+
+void AStar(int sx,int sy,int gx,int gy){
+    priority_queue<NodeAStar> pq;
+    vector<vector<bool>> visited(ROWS, vector<bool>(COLS,false));
+    vector<vector<pair<int,int>>> parent(ROWS, vector<pair<int,int>>(COLS,{-1,-1}));
+    vector<pair<int,int>> traversal;
+
+    pq.push({sx,sy,0,heuristic(sx,sy,gx,gy)});
+
+    cout << "\n--- A* Search (Printing g, h, f=g+h) ---\n";
+
+    while(!pq.empty()){
+        NodeAStar cur = pq.top(); pq.pop();
+        if(visited[cur.x][cur.y]) continue;
+
+        visited[cur.x][cur.y] = true;
+        traversal.push_back({cur.x,cur.y});
+
+        cout << "Visiting (" << cur.x << "," << cur.y 
+             << ")  g=" << cur.g 
+             << "  h=" << cur.h 
+             << "  f=" << cur.g + cur.h << "\n";
+
+        if(cur.x==gx && cur.y==gy){
+            cout<<"\nA* Traversal Order:\n"; printPath(traversal);
+
+            vector<pair<int,int>> path;
+            int x=cur.x, y=cur.y;
+            while(x!=-1){
+                path.push_back({x,y});
+                auto p=parent[x][y]; x=p.first; y=p.second;
+            }
+            reverse(path.begin(),path.end());
+            cout<<"\nA* Path:\n"; printPath(path);
+            return;
+        }
+
+        for(int i=0;i<4;i++){
+            int nx=cur.x+dx[i], ny=cur.y+dy[i];
+            if(nx>=0 && ny>=0 && nx<ROWS && ny<COLS && maze[nx][ny]==0 && !visited[nx][ny]){
+                parent[nx][ny]={cur.x,cur.y};
+                pq.push({nx,ny,cur.g+1,heuristic(nx,ny,gx,gy)});
+            }
+        }
+    }
+    cout<<"No path found using A*\n";
+}
+
+/* ================= Depth-Limited Search ================= */
+bool DLSUtil(int x,int y,int gx,int gy,int limit,
+             vector<pair<int,int>> &path,
+             vector<pair<int,int>> &traversal){
+
+    traversal.push_back({x,y});
+
+    if(x==gx && y==gy){
+        path.push_back({x,y});
+        return true;
+    }
+
+    if(limit==0) return false;
+
+    visited[x][y]=true;
+    path.push_back({x,y});
+
+    for(int i=0;i<4;i++){
+        int nx=x+dx[i], ny=y+dy[i];
+        if(nx>=0 && ny>=0 && nx<ROWS && ny<COLS &&
+           maze[nx][ny]==0 && !visited[nx][ny]){
+
+            if(DLSUtil(nx,ny,gx,gy,limit-1,path,traversal))
+                return true;
+        }
+    }
+
+    path.pop_back();
+    return false;
+}
+
+void DLS(int sx,int sy,int gx,int gy,int limit){
+    memset(visited,false,sizeof(visited));
+    vector<pair<int,int>> path, traversal;
+
+    if(DLSUtil(sx,sy,gx,gy,limit,path,traversal)){
+        cout << "\nDLS Traversal Order (limit="<<limit<<"):\n";
+        printPath(traversal);
+
+        cout << "\nDLS Path:\n";
+        printPath(path);
+    } else {
+        cout << "\nGoal NOT found within depth limit " << limit << "\n";
+        cout << "Traversal was:\n";
+        printPath(traversal);
+    }
+}
+
+/* ================= MAIN ================= */
+int main(){
+    int sx,sy,gx,gy,limit;
+
+    cout<<"Enter Start State (row col): ";
+    cin>>sx>>sy;
+
+    cout<<"Enter Goal State (row col): ";
+    cin>>gx>>gy;
+
+    cout<<"Enter Depth Limit for DLS: ";
+    cin>>limit;
+
+    if(maze[sx][sy]==1 || maze[gx][gy]==1){
+        cout<<"Start or Goal is a wall!\n";
+        return 0;
+    }
+
+    BFS(sx,sy,gx,gy);
+    DFS(sx,sy,gx,gy);
+    BestFirst(sx,sy,gx,gy);
+    AStar(sx,sy,gx,gy);
+    DLS(sx,sy,gx,gy,limit);
+
+    return 0;
+}
+
+8 Puzzle
+#include <bits/stdc++.h>
+using namespace std;
+
+using Board = vector<vector<int>>;
+
+struct State {
+    Board board;
+    vector<Board> path;
+    int g, h;
+};
+
+int dx[4] = {-1, 1, 0, 0};
+int dy[4] = {0, 0, -1, 1};
+
+/* ----------------- Utilities ----------------- */
+void printBoard(const Board &b) {
+    for (auto &r : b) {
+        for (int x : r) cout << x << " ";
+        cout << "\n";
+    }
+    cout << "------\n";
+}
+
+string toString(const Board &b) {
+    string s;
+    for (auto &r : b)
+        for (int x : r)
+            s += char(x + '0');
+    return s;
+}
+
+pair<int,int> findZero(const Board &b) {
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+            if (b[i][j] == 0)
+                return {i, j};
+    return {-1, -1};
+}
+
+// Manhattan distance heuristic
+int heuristic(const Board &b, const Board &goal) {
+    int h = 0;
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++) {
+            if (b[i][j] == 0) continue;
+            for (int x = 0; x < 3; x++)
+                for (int y = 0; y < 3; y++)
+                    if (goal[x][y] == b[i][j])
+                        h += abs(i - x) + abs(j - y);
+        }
+    return h;
+}
+
+/* ===================== BFS ===================== */
+void BFS(Board start, Board goal) {
+    queue<State> q;
+    unordered_set<string> visited;
+    vector<Board> traversal, solution;
+
+    q.push({start, {start}, 0, 0});
+    visited.insert(toString(start));
+    int count = 0;
+
+    while (!q.empty()) {
+        auto cur = q.front(); q.pop();
+        count++;
+        traversal.push_back(cur.board);
+
+        if (cur.board == goal) {
+            solution = cur.path;
+            break;
+        }
+
+        auto [x,y] = findZero(cur.board);
+        for (int k = 0; k < 4; k++) {
+            int nx=x+dx[k], ny=y+dy[k];
+            if(nx>=0 && ny>=0 && nx<3 && ny<3) {
+                Board nxt = cur.board;
+                swap(nxt[x][y], nxt[nx][ny]);
+                string key = toString(nxt);
+                if(!visited.count(key)) {
+                    visited.insert(key);
+                    auto p = cur.path;
+                    p.push_back(nxt);
+                    q.push({nxt, p, 0, 0});
+                }
+            }
+        }
+    }
+
+    cout << "\n===== BFS =====\n";
+    cout << "States Traversed: " << count << "\n\nTraversal:\n";
+    for(auto &b : traversal) printBoard(b);
+    cout << "Shortest Path:\n";
+    for(auto &b : solution) printBoard(b);
+}
+
+/* ===================== DFS ===================== */
+bool DFSUtil(Board cur, Board goal, unordered_set<string> &vis,
+             vector<Board> &path, int &count) {
+    count++;
+    if(cur == goal) return true;
+    vis.insert(toString(cur));
+
+    auto [x,y] = findZero(cur);
+    for(int k=0;k<4;k++) {
+        int nx=x+dx[k], ny=y+dy[k];
+        if(nx>=0 && ny>=0 && nx<3 && ny<3) {
+            Board nxt = cur;
+            swap(nxt[x][y], nxt[nx][ny]);
+            if(!vis.count(toString(nxt))) {
+                path.push_back(nxt);
+                if(DFSUtil(nxt, goal, vis, path, count))
+                    return true;
+                path.pop_back();
+            }
+        }
+    }
+    return false;
+}
+
+void DFS(Board start, Board goal) {
+    unordered_set<string> vis;
+    vector<Board> path = {start};
+    int count = 0;
+
+    DFSUtil(start, goal, vis, path, count);
+
+    cout << "\n===== DFS =====\n";
+    cout << "States Traversed: " << count << "\n\nSolution Path:\n";
+    for(auto &b : path) printBoard(b);
+}
+
+/* ================= DFS (Depth Limited) ================= */
+bool DLSUtil(Board cur, Board goal, int limit,
+             unordered_set<string> &vis,
+             vector<Board> &path, int &count) {
+    count++;
+    if(cur == goal) return true;
+    if(limit == 0) return false;
+
+    vis.insert(toString(cur));
+    auto [x,y] = findZero(cur);
+
+    for(int k=0;k<4;k++) {
+        int nx=x+dx[k], ny=y+dy[k];
+        if(nx>=0 && ny>=0 && nx<3 && ny<3) {
+            Board nxt = cur;
+            swap(nxt[x][y], nxt[nx][ny]);
+            if(!vis.count(toString(nxt))) {
+                path.push_back(nxt);
+                if(DLSUtil(nxt, goal, limit-1, vis, path, count))
+                    return true;
+                path.pop_back();
+            }
+        }
+    }
+    return false;
+}
+
+void DLS(Board start, Board goal, int limit) {
+    unordered_set<string> vis;
+    vector<Board> path = {start};
+    int count = 0;
+
+    cout << "\n===== DFS (Depth Limit = " << limit << ") =====\n";
+    if(DLSUtil(start, goal, limit, vis, path, count)) {
+        cout << "States Traversed: " << count << "\n\nSolution Path:\n";
+        for(auto &b : path) printBoard(b);
+    } else {
+        cout << "Goal not found\nStates Traversed: " << count << "\n";
+    }
+}
+
+/* ================= Best-First Search ================= */
+void BestFirst(Board start, Board goal) {
+    auto cmp = [](State &a, State &b){ return a.h > b.h; };
+    priority_queue<State, vector<State>, decltype(cmp)> pq(cmp);
+    unordered_set<string> visited;
+    vector<Board> traversal;
+
+    pq.push({start, {start}, 0, heuristic(start,goal)});
+    int count = 0;
+
+    while(!pq.empty()) {
+        auto cur = pq.top(); pq.pop();
+        string key = toString(cur.board);
+        if(visited.count(key)) continue;
+
+        visited.insert(key);
+        traversal.push_back(cur.board);
+        count++;
+
+        if(cur.board == goal) {
+            cout << "\n===== Best First Search =====\n";
+            cout << "States Traversed: " << count << "\n\nTraversal:\n";
+            for(auto &b:traversal) printBoard(b);
+
+            cout << "Solution Path (with heuristic h):\n";
+            for(auto &b:cur.path) {
+                printBoard(b);
+                cout << "h = " << heuristic(b, goal) << "\n";
+                cout << "------\n";
+            }
+            return;
+        }
+
+        auto [x,y] = findZero(cur.board);
+        for(int k=0;k<4;k++) {
+            int nx=x+dx[k], ny=y+dy[k];
+            if(nx>=0 && ny>=0 && nx<3 && ny<3) {
+                Board nxt = cur.board;
+                swap(nxt[x][y], nxt[nx][ny]);
+                auto p = cur.path;
+                p.push_back(nxt);
+                pq.push({nxt, p, 0, heuristic(nxt,goal)});
+            }
+        }
+    }
+}
+
+/* ===================== A* ===================== */
+void AStar(Board start, Board goal) {
+    auto cmp = [](State &a, State &b){
+        return (a.g + a.h) > (b.g + b.h);
+    };
+    priority_queue<State, vector<State>, decltype(cmp)> pq(cmp);
+    unordered_set<string> closed;
+    vector<Board> traversal;
+
+    pq.push({start, {start}, 0, heuristic(start,goal)});
+    int count = 0;
+
+    while(!pq.empty()) {
+        auto cur = pq.top(); pq.pop();
+        string key = toString(cur.board);
+        if(closed.count(key)) continue;
+
+        closed.insert(key);
+        traversal.push_back(cur.board);
+        count++;
+
+        if(cur.board == goal) {
+            cout << "\n===== A* Search =====\n";
+            cout << "States Traversed: " << count << "\n\nTraversal:\n";
+            for(auto &b:traversal) printBoard(b);
+
+            cout << "Optimal Path (with g, h, f):\n";
+            int g = 0;
+            for(auto &b:cur.path) {
+                printBoard(b);
+                int h = heuristic(b, goal);
+                int f = g + h;
+                cout << "g = " << g << ", h = " << h << ", f = " << f << "\n";
+                cout << "------\n";
+                g++; // cost per move = 1
+            }
+            return;
+        }
+
+        auto [x,y] = findZero(cur.board);
+        for(int k=0;k<4;k++) {
+            int nx=x+dx[k], ny=y+dy[k];
+            if(nx>=0 && ny>=0 && nx<3 && ny<3) {
+                Board nxt = cur.board;
+                swap(nxt[x][y], nxt[nx][ny]);
+                auto p = cur.path;
+                p.push_back(nxt);
+                pq.push({nxt, p, cur.g+1, heuristic(nxt,goal)});
+            }
+        }
+    }
+}
+
+/* ===================== MAIN ===================== */
+int main() {
+    Board start = {
+        {1, 2, 3},
+        {4, 0, 6},
+        {7, 5, 8}
+    };
+    Board goal = {
+        {1, 2, 3},
+        {4, 5, 6},
+        {7, 8, 0}
+    };
+
+    BFS(start,goal);
+    DFS(start,goal);
+    DLS(start,goal,3);
+    BestFirst(start,goal);
+    AStar(start,goal);
+
+    return 0;
+}
+
+Water Jar
+#include <bits/stdc++.h>
+using namespace std;
+
+struct State {
+    int a, b;
+    vector<pair<int,int>> path;
+    int g, h;
+};
+
+int CAP1 = 4;   // Jug1 capacity
+int CAP2 = 3;   // Jug2 capacity
+
+/* ---------------- Utility Functions ---------------- */
+void printState(int a, int b) {
+    cout << "(" << a << "," << b << ")\n";
+}
+
+string encode(int a, int b) {
+    return to_string(a) + "," + to_string(b);
+}
+
+int heuristic(int a, int b, int target) {
+    return min(abs(a - target), abs(b - target));
+}
+
+vector<pair<int,int>> generateMoves(int a, int b) {
+    vector<pair<int,int>> moves;
+
+    // Fill jug1
+    moves.push_back({CAP1, b});
+    // Fill jug2
+    moves.push_back({a, CAP2});
+    // Empty jug1
+    moves.push_back({0, b});
+    // Empty jug2
+    moves.push_back({a, 0});
+
+    // Pour jug1 -> jug2
+    int pour = min(a, CAP2 - b);
+    moves.push_back({a - pour, b + pour});
+
+    // Pour jug2 -> jug1
+    pour = min(b, CAP1 - a);
+    moves.push_back({a + pour, b - pour});
+
+    return moves;
+}
+
+/* ===================== BFS ===================== */
+void BFS(int target) {
+    queue<State> q;
+    unordered_set<string> vis;
+    vector<pair<int,int>> traversal;
+
+    State start = {0,0, {{0,0}}, 0,0};
+    q.push(start);
+    vis.insert(encode(0,0));
+
+    while(!q.empty()) {
+        auto cur = q.front(); q.pop();
+
+        traversal.push_back({cur.a, cur.b});
+
+        if (cur.a == target || cur.b == target) {
+            cout << "\n===== BFS =====\n";
+            cout << "Traversal:\n";
+            for(auto &t:traversal) printState(t.first,t.second);
+
+            cout << "\nSolution Path:\n";
+            for(auto &p:cur.path) printState(p.first,p.second);
+            cout << "END\n";
+            return;
+        }
+
+        for(auto &m : generateMoves(cur.a, cur.b)) {
+            if(!vis.count(encode(m.first,m.second))) {
+                vis.insert(encode(m.first,m.second));
+                auto p = cur.path;
+                p.push_back(m);
+                q.push({m.first,m.second,p,0,0});
+            }
+        }
+    }
+}
+
+/* ===================== DFS ===================== */
+bool DFSUtil(int a, int b, int target,
+             unordered_set<string> &vis,
+             vector<pair<int,int>> &path,
+             vector<pair<int,int>> &traversal) {
+
+    traversal.push_back({a,b});
+
+    if(a == target || b == target) return true;
+
+    vis.insert(encode(a,b));
+
+    for(auto &m : generateMoves(a,b)) {
+        if(!vis.count(encode(m.first,m.second))) {
+            path.push_back(m);
+            if(DFSUtil(m.first,m.second,target,vis,path,traversal))
+                return true;
+            path.pop_back();
+        }
+    }
+    return false;
+}
+
+void DFS(int target) {
+    unordered_set<string> vis;
+    vector<pair<int,int>> path = {{0,0}};
+    vector<pair<int,int>> traversal;
+
+    DFSUtil(0,0,target,vis,path,traversal);
+
+    cout << "\n===== DFS =====\nTraversal:\n";
+    for(auto &p:traversal) printState(p.first,p.second);
+
+    cout << "\nSolution Path:\n";
+    for(auto &p:path) printState(p.first,p.second);
+    cout << "END\n";
+}
+
+/* ===================== DLS ===================== */
+bool DLSUtil(int a, int b, int target, int limit,
+             unordered_set<string> &vis,
+             vector<pair<int,int>> &path,
+             vector<pair<int,int>> &traversal) {
+
+    traversal.push_back({a,b});
+
+    if(a == target || b == target) return true;
+    if(limit == 0) return false;
+
+    vis.insert(encode(a,b));
+
+    for(auto &m : generateMoves(a,b)) {
+        if(!vis.count(encode(m.first,m.second))) {
+            path.push_back(m);
+            if(DLSUtil(m.first,m.second,target,limit-1,vis,path,traversal))
+                return true;
+            path.pop_back();
+        }
+    }
+
+    return false;
+}
+
+void DLS(int target, int limit) {
+    unordered_set<string> vis;
+    vector<pair<int,int>> path = {{0,0}};
+    vector<pair<int,int>> traversal;
+
+    cout << "\n===== DLS (Limit = " << limit << ") =====\n";
+
+    if(DLSUtil(0,0,target,limit,vis,path,traversal)) {
+        cout << "Traversal:\n";
+        for(auto &p:traversal) printState(p.first,p.second);
+
+        cout << "\nSolution Path:\n";
+        for(auto &p:path) printState(p.first,p.second);
+        cout << "END\n";
+    } else {
+        cout << "Goal Not Found\nTraversal:\n";
+        for(auto &p:traversal) printState(p.first,p.second);
+    }
+}
+
+/* ===================== Best First Search ===================== */
+void BestFirst(int target) {
+    auto cmp = [&](State &a, State &b){
+        return a.h > b.h;
+    };
+
+    priority_queue<State, vector<State>, decltype(cmp)> pq(cmp);
+    unordered_set<string> vis;
+    vector<pair<int,int>> traversal;
+
+    pq.push({0,0,{{0,0}},0,heuristic(0,0,target)});
+
+    while(!pq.empty()) {
+        auto cur = pq.top(); pq.pop();
+
+        if(vis.count(encode(cur.a,cur.b))) continue;
+        vis.insert(encode(cur.a,cur.b));
+        traversal.push_back({cur.a,cur.b});
+
+        if(cur.a == target || cur.b == target) {
+            cout << "\n===== Best First Search =====\nTraversal:\n";
+            for(auto &t:traversal) printState(t.first,t.second);
+
+            cout << "\nSolution Path (with h):\n";
+            for(auto &p:cur.path) {
+                printState(p.first,p.second);
+                cout << "h = " << heuristic(p.first,p.second,target) << "\n-----\n";
+            }
+            cout << "END\n";
+            return;
+        }
+
+        for(auto &m : generateMoves(cur.a, cur.b)) {
+            auto p = cur.path;
+            p.push_back(m);
+            pq.push({m.first,m.second,p,0,heuristic(m.first,m.second,target)});
+        }
+    }
+}
+
+/* ===================== A* Search ===================== */
+void AStar(int target) {
+    auto cmp = [&](State &a, State &b){
+        return (a.g + a.h) > (b.g + b.h);
+    };
+
+    priority_queue<State, vector<State>, decltype(cmp)> pq(cmp);
+    unordered_set<string> closed;
+    vector<pair<int,int>> traversal;
+
+    pq.push({0,0,{{0,0}},0,heuristic(0,0,target)});
+
+    while(!pq.empty()) {
+        auto cur = pq.top(); pq.pop();
+
+        if(closed.count(encode(cur.a,cur.b))) continue;
+        closed.insert(encode(cur.a,cur.b));
+        traversal.push_back({cur.a,cur.b});
+
+        if(cur.a == target || cur.b == target) {
+            cout << "\n===== A* Search =====\nTraversal:\n";
+            for(auto &t:traversal) printState(t.first,t.second);
+
+            cout << "\nOptimal Path (g,h,f):\n";
+
+            int g = 0;
+            for(auto &p:cur.path) {
+                int h = heuristic(p.first,p.second,target);
+                cout << "(" << p.first << "," << p.second << ")\n";
+                cout << "g = " << g << ", h = " << h << ", f = " << g+h << "\n-----\n";
+                g++;
+            }
+            cout << "END\n";
+            return;
+        }
+
+        int a = cur.a, b = cur.b;
+
+        for(auto &m : generateMoves(a,b)) {
+            auto p = cur.path;
+            p.push_back(m);
+            pq.push({m.first,m.second,p,cur.g+1,heuristic(m.first,m.second,target)});
+        }
+    }
+}
+
+/* ===================== MAIN ===================== */
+int main() {
+    int target;
+    cout << "Enter target amount: ";
+    cin >> target;
+
+    BFS(target);
+    DFS(target);
+    DLS(target, 3);
+    BestFirst(target);
+    AStar(target);
+
+    return 0;
+}
+
+8 queen
+#include <bits/stdc++.h>
+using namespace std;
+
+const int N = 8;
+
+/* ===================== STATE STRUCT ===================== */
+struct State {
+    vector<int> board;               
+    vector<vector<int>> path;        
+    int g, h;                        
+};
+
+/* ===================== PRINT BOARD ===================== */
+void printBoard(const vector<int> &b) {
+    for (int r = 0; r < N; r++) {
+        for (int c = 0; c < N; c++) {
+            if (r < (int)b.size() && b[r] == c)
+                cout << "Q ";
+            else
+                cout << ". ";
+        }
+        cout << "\n";
+    }
+    cout << "-------------\n";
+}
+
+/* =============== SAFETY CHECK =============== */
+bool isSafe(int row, int col, const vector<int> &board) {
+    for (int r = 0; r < row; r++) {
+        int c = board[r];
+        if (c == col) return false;
+        if (abs(row - r) == abs(col - c)) return false;
+    }
+    return true;
+}
+
+/* =============== HEURISTIC FUNCTIONS =============== */
+// Best First & A*: h = remaining queens
+int heuristic(const vector<int> &b) { return N - (int)b.size(); }
+
+/* =============== GENERATE NEXT STATES =============== */
+vector<vector<int>> expand(const vector<int> &b) {
+    vector<vector<int>> children;
+    int row = b.size();
+    if (row == N) return children;
+
+    for (int col = 0; col < N; col++) {
+        if (isSafe(row, col, b)) {
+            vector<int> nxt = b;
+            nxt.push_back(col);
+            children.push_back(nxt);
+        }
+    }
+    return children;
+}
+
+/* ===================== BFS ===================== */
+void BFS() {
+    cout << "\n========== BFS ==========\n";
+
+    queue<State> q;
+    int explored = 0;
+
+    State start{{}, {{}} ,0, heuristic({})};
+    q.push(start);
+
+    while (!q.empty()) {
+        State cur = q.front(); q.pop();
+        explored++;
+
+        if (cur.board.size() == N) {
+            cout << "States Explored = " << explored << "\n\n";
+            cout << "Solution Path:\n";
+            for (auto &b : cur.path) printBoard(b);
+            return;
+        }
+
+        for (auto &child : expand(cur.board)) {
+            State s;
+            s.board = child;
+            s.path = cur.path;
+            s.path.push_back(child);
+            q.push(s);
+        }
+    }
+}
+
+/* ===================== DFS ===================== */
+bool DFSUtil(State cur, vector<vector<int>> &path, int &explored) {
+    explored++;
+
+    if (cur.board.size() == N) return true;
+
+    for (auto &child : expand(cur.board)) {
+        path.push_back(child);
+        if (DFSUtil({child, path, 0, 0}, path, explored)) return true;
+        path.pop_back();
+    }
+    return false;
+}
+
+void DFS() {
+    cout << "\n========== DFS ==========\n";
+
+    vector<vector<int>> path = {{}};
+    int explored = 0;
+    DFSUtil({{}, path, 0, 0}, path, explored);
+
+    cout << "States Explored = " << explored << "\n\n";
+    cout << "Solution Path:\n";
+    for (auto &b : path) printBoard(b);
+}
+
+/* ===================== DLS ===================== */
+bool DLSUtil(State cur, int limit, vector<vector<int>> &path, int &explored) {
+    explored++;
+
+    if (cur.board.size() == N) return true;
+    if (limit == 0) return false;
+
+    for (auto &child : expand(cur.board)) {
+        path.push_back(child);
+        if (DLSUtil({child, path, 0, 0}, limit - 1, path, explored))
+            return true;
+        path.pop_back();
+    }
+    return false;
+}
+
+void DLS(int limit) {
+    cout << "\n========== DLS (limit=" << limit << ") ==========\n";
+
+    vector<vector<int>> path = {{}};
+    int explored = 0;
+
+    if (DLSUtil({{}, path, 0, 0}, limit, path, explored)) {
+        cout << "States Explored = " << explored << "\n\n";
+        cout << "Solution Path:\n";
+        for (auto &b : path) printBoard(b);
+    } else {
+        cout << "Goal NOT found\n";
+        cout << "States Explored = " << explored << "\n";
+    }
+}
+
+/* ===================== BEST FIRST SEARCH ===================== */
+void BestFirst() {
+    cout << "\n========== Best First Search ==========\n";
+
+    auto cmp = [&](State &a, State &b) { return a.h > b.h; };
+    priority_queue<State, vector<State>, decltype(cmp)> pq(cmp);
+
+    pq.push({{}, {{}}, 0, heuristic({})});
+    int explored = 0;
+
+    while (!pq.empty()) {
+        State cur = pq.top(); pq.pop();
+        explored++;
+
+        if (cur.board.size() == N) {
+            cout << "States Explored = " << explored << "\n\n";
+            cout << "Solution Path (with h):\n";
+            for (auto &b : cur.path) {
+                printBoard(b);
+                cout << "h = " << heuristic(b) << "\n\n";
+            }
+            return;
+        }
+
+        for (auto &child : expand(cur.board)) {
+            auto p = cur.path;
+            p.push_back(child);
+            pq.push({child, p, 0, heuristic(child)});
+        }
+    }
+}
+
+/* ===================== A* SEARCH ===================== */
+void AStar() {
+    cout << "\n========== A* Search ==========\n";
+
+    auto cmp = [&](State &a, State &b) {
+        return (a.g + a.h) > (b.g + b.h);
+    };
+
+    priority_queue<State, vector<State>, decltype(cmp)> pq(cmp);
+    int explored = 0;
+
+    pq.push({{}, {{}}, 0, heuristic({})});
+
+    while (!pq.empty()) {
+        State cur = pq.top(); pq.pop();
+        explored++;
+
+        if (cur.board.size() == N) {
+            cout << "States Explored = " << explored << "\n\n";
+            cout << "Solution Path (g,h,f):\n";
+
+            int g = 0;
+            for (auto &b : cur.path) {
+                int h = heuristic(b);
+                printBoard(b);
+                cout << "g = " << g << ", h = " << h << ", f = " << g + h << "\n\n";
+                g++;
+            }
+            return;
+        }
+
+        for (auto &child : expand(cur.board)) {
+            auto p = cur.path;
+            p.push_back(child);
+            pq.push({child, p, cur.g + 1, heuristic(child)});
+        }
+    }
+}
+
+/* ===================== MAIN ===================== */
+int main() {
+    BFS();
+    DFS();
+    DLS(3);
+    BestFirst();
+    AStar();
+    return 0;
+}
+
+
+Missionary and cannibals
+#include <bits/stdc++.h>
+using namespace std;
+
+struct State {
+    int M, C, B;  
+    vector<tuple<int,int,int>> path;
+    int g, h;
+};
+
+void printState(const tuple<int,int,int> &s) {
+    cout << "(M=" << get<0>(s)
+         << ", C=" << get<1>(s)
+         << ", B=" << get<2>(s) << ")\n";
+}
+
+string encode(int M, int C, int B) {
+    return to_string(M) + "," + to_string(C) + "," + to_string(B);
+}
+
+bool isValid(int M, int C, int B) {
+    if (M < 0 || M > 3 || C < 0 || C > 3) return false;
+
+    int M_r = 3 - M;
+    int C_r = 3 - C;
+
+    if (M > 0 && C > M) return false;     
+    if (M_r > 0 && C_r > M_r) return false; 
+
+    return true;
+}
+
+vector<tuple<int,int,int>> getMoves(int M, int C, int B) {
+    vector<tuple<int,int,int>> moves;
+
+    vector<pair<int,int>> actions = {
+        {1,0}, {2,0}, {0,1}, {0,2}, {1,1}
+    };
+
+    int dir = (B == 0 ? -1 : 1);
+
+    for (auto &act : actions) {
+        int m = act.first;
+        int c = act.second;
+        if (m + c == 0) continue;  
+        int nM = M + dir * m;
+        int nC = C + dir * c;
+        int nB = 1 - B;
+
+        if (isValid(nM, nC, nB))
+            moves.push_back({nM, nC, nB});
+    }
+
+    return moves;
+}
+
+int heuristic(int M, int C, int B) {
+    return M + C;   
+}
+
+void BFS() {
+    queue<State> q;
+    unordered_set<string> vis;
+    vector<tuple<int,int,int>> traversal;
+
+    State start = {3,3,0, {{3,3,0}}, 0, 0};
+    q.push(start);
+    vis.insert(encode(3,3,0));
+
+    while (!q.empty()) {
+        auto cur = q.front(); q.pop();
+
+        traversal.push_back({cur.M,cur.C,cur.B});
+
+        if (cur.M == 0 && cur.C == 0 && cur.B == 1) {
+            cout << "\n===== BFS =====\nTraversal:\n";
+            for (auto &t : traversal) printState(t);
+
+            cout << "\nSolution Path:\n";
+            for (auto &p : cur.path) printState(p);
+            cout << "END\n";
+            return;
+        }
+
+        for (auto &mv : getMoves(cur.M,cur.C,cur.B)) {
+            int M = get<0>(mv), C = get<1>(mv), B = get<2>(mv);
+            string key = encode(M,C,B);
+
+            if (!vis.count(key)) {
+                vis.insert(key);
+                auto p = cur.path;
+                p.push_back(mv);
+                q.push({M,C,B,p,0,0});
+            }
+        }
+    }
+}
+
+bool DFSUtil(State cur,
+             unordered_set<string> &vis,
+             vector<tuple<int,int,int>> &traversal,
+             vector<tuple<int,int,int>> &path)
+{
+    traversal.push_back({cur.M,cur.C,cur.B});
+
+    if (cur.M == 0 && cur.C == 0 && cur.B == 1)
+        return true;
+
+    vis.insert(encode(cur.M,cur.C,cur.B));
+
+    for (auto &mv : getMoves(cur.M,cur.C,cur.B)) {
+        int M = get<0>(mv), C = get<1>(mv), B = get<2>(mv);
+
+        if (!vis.count(encode(M,C,B))) {
+            path.push_back(mv);
+
+            if (DFSUtil({M,C,B,path,0,0}, vis, traversal, path))
+                return true;
+
+            path.pop_back();
+        }
+    }
+    return false;
+}
+
+void DFS() {
+    unordered_set<string> vis;
+    vector<tuple<int,int,int>> path = {{3,3,0}};
+    vector<tuple<int,int,int>> traversal;
+
+    DFSUtil({3,3,0,path,0,0}, vis, traversal, path);
+
+    cout << "\n===== DFS =====\nTraversal:\n";
+    for (auto &t : traversal) printState(t);
+
+    cout << "\nSolution Path:\n";
+    for (auto &p : path) printState(p);
+    cout << "END\n";
+}
+
+bool DLSUtil(State cur, int limit,
+             unordered_set<string> &vis,
+             vector<tuple<int,int,int>> &traversal,
+             vector<tuple<int,int,int>> &path)
+{
+    traversal.push_back({cur.M,cur.C,cur.B});
+
+    if (cur.M == 0 && cur.C == 0 && cur.B == 1)
+        return true;
+
+    if (limit == 0)
+        return false;
+
+    vis.insert(encode(cur.M,cur.C,cur.B));
+
+    for (auto &mv : getMoves(cur.M,cur.C,cur.B)) {
+        int M = get<0>(mv), C = get<1>(mv), B = get<2>(mv);
+
+        if (!vis.count(encode(M,C,B))) {
+            path.push_back(mv);
+
+            if (DLSUtil({M,C,B,path,0,0}, limit - 1, vis, traversal, path))
+                return true;
+
+            path.pop_back();
+        }
+    }
+    return false;
+}
+
+void DLS(int limit) {
+    unordered_set<string> vis;
+    vector<tuple<int,int,int>> path = {{3,3,0}};
+    vector<tuple<int,int,int>> traversal;
+
+    cout << "\n===== DLS (Limit = " << limit << ") =====\n";
+
+    if (DLSUtil({3,3,0,path,0,0}, limit, vis, traversal, path)) {
+        cout << "Traversal:\n";
+        for (auto &t : traversal) printState(t);
+
+        cout << "\nSolution Path:\n";
+        for (auto &p : path) printState(p);
+        cout << "END\n";
+    } else {
+        cout << "Goal NOT found.\nTraversal:\n";
+        for (auto &t : traversal) printState(t);
+    }
+}
+
+void BestFirst() {
+    auto cmp = [&](State &a, State &b) {
+        return a.h > b.h;
+    };
+
+    priority_queue<State, vector<State>, decltype(cmp)> pq(cmp);
+    unordered_set<string> vis;
+    vector<tuple<int,int,int>> traversal;
+
+    pq.push({3,3,0, {{3,3,0}}, 0, heuristic(3,3,0)});
+
+    while (!pq.empty()) {
+        auto cur = pq.top(); pq.pop();
+
+        if (vis.count(encode(cur.M,cur.C,cur.B))) continue;
+        vis.insert(encode(cur.M,cur.C,cur.B));
+
+        traversal.push_back({cur.M,cur.C,cur.B});
+
+        if (cur.M == 0 && cur.C == 0 && cur.B == 1) {
+            cout << "\n===== Best First Search =====\nTraversal:\n";
+            for (auto &t : traversal) printState(t);
+
+            cout << "\nSolution Path (with h):\n";
+            for (auto &p : cur.path) {
+                printState(p);
+                cout << "h = " << heuristic(get<0>(p),get<1>(p),get<2>(p)) << "\n-----\n";
+            }
+            cout << "END\n";
+            return;
+        }
+
+        for (auto &mv : getMoves(cur.M,cur.C,cur.B)) {
+            int M = get<0>(mv), C = get<1>(mv), B = get<2>(mv);
+            auto p = cur.path;
+            p.push_back(mv);
+            pq.push({M,C,B,p,0,heuristic(M,C,B)});
+        }
+    }
+}
+
+void AStar() {
+    auto cmp = [&](State &a, State &b){
+        return (a.g + a.h) > (b.g + b.h);
+    };
+
+    priority_queue<State, vector<State>, decltype(cmp)> pq(cmp);
+    unordered_set<string> closed;
+    vector<tuple<int,int,int>> traversal;
+
+    pq.push({3,3,0, {{3,3,0}}, 0, heuristic(3,3,0)});
+
+    while(!pq.empty()) {
+        auto cur = pq.top(); pq.pop();
+
+        if (closed.count(encode(cur.M,cur.C,cur.B))) continue;
+        closed.insert(encode(cur.M,cur.C,cur.B));
+
+        traversal.push_back({cur.M,cur.C,cur.B});
+
+        if (cur.M == 0 && cur.C == 0 && cur.B == 1) {
+            cout << "\n===== A* Search =====\nTraversal:\n";
+            for (auto &t : traversal) printState(t);
+
+            cout << "\nOptimal Path (g,h,f):\n";
+
+            int g = 0;
+            for (auto &p : cur.path) {
+                int M = get<0>(p), C = get<1>(p), B = get<2>(p);
+                int h = heuristic(M,C,B);
+                cout << "(M=" << M << ", C=" << C << ", B=" << B << ")\n";
+                cout << "g=" << g << ", h=" << h << ", f=" << g+h << "\n-----\n";
+                g++;
+            }
+            cout << "END\n";
+            return;
+        }
+
+        for (auto &mv : getMoves(cur.M,cur.C,cur.B)) {
+            int M = get<0>(mv), C = get<1>(mv), B = get<2>(mv);
+            auto p = cur.path;
+            p.push_back(mv);
+
+            pq.push({M,C,B,p,cur.g+1,heuristic(M,C,B)});
+        }
+    }
+}
+
+int main() {
+    BFS();
+    DFS();
+    DLS(3);
+    BestFirst();
+    AStar();
+return 0;
+}
+
+
+
+
+CRYPT ARITHMETIC:
+#include <bits/stdc++.h>
+using namespace std;
+
+vector<char> letters;
+bool occupied[10];
+unordered_map<char, int> assigned;
+
+// Function to convert word -> number based on current assignment
+int sum(const string &s) {
+    int summ = 0;
+    for (char c : s) {
+        if (assigned.find(c) == assigned.end()) return -1; // not yet assigned
+        summ = summ * 10 + assigned[c];
+    }
+    return summ;
+}
+
+// Backtracking solver
+bool cryptArithmetic(int ind, const string &in1, const string &in2, const string &result) {
+    if (ind == (int)letters.size()) {
+        int left = sum(in1) + sum(in2);
+        int right = sum(result);
+
+        if (left == right) {
+            // Print solution
+            cout << in1 << ":";
+            for (char c : in1) cout << assigned[c];
+            cout << "\n";
+
+            cout << in2 << ":";
+            for (char c : in2) cout << assigned[c];
+            cout << "\n";
+
+            cout << result << ":";
+            for (char c : result) cout << assigned[c];
+            cout << "\n";
+
+            return true;
+        }
+        return false;
+    }
+
+    char l = letters[ind];
+
+    for (int i = 0; i < 10; i++) {
+        // Leading digit cannot be zero
+        if ((in1[0] == l && i == 0) ||
+            (in2[0] == l && i == 0) ||
+            (result[0] == l && i == 0)) continue;
+
+        if (!occupied[i]) {
+            assigned[l] = i;
+            occupied[i] = true;
+
+            if (cryptArithmetic(ind + 1, in1, in2, result)) return true;
+
+            assigned.erase(l);
+            occupied[i] = false;
+        }
+    }
+    return false;
+}
+
+int main() {
+    string in1, in2, result;
+    cout << "Enter first input string:" << endl;
+    cin >> in1;
+    cout << "Enter second input string:" << endl;
+    cin >> in2;
+    cout << "Enter result string:" << endl;
+    cin >> result;
+
+    vector<bool> visited(26, false);
+
+    for (char c : in1) {
+        if (!visited[c - 'A']) {
+            letters.push_back(c);
+            visited[c - 'A'] = true;
+        }
+    }
+    for (char c : in2) {
+        if (!visited[c - 'A']) {
+            letters.push_back(c);
+            visited[c - 'A'] = true;
+        }
+    }
+    for (char c : result) {
+        if (!visited[c - 'A']) {
+            letters.push_back(c);
+            visited[c - 'A'] = true;
+        }
+    }
+
+    if (!cryptArithmetic(0, in1, in2, result)) {
+        cout << "No solution" << endl;
+    }
+
+    return 0;
+}
+
+8 QUEEN WITH CSP
+#include <bits/stdc++.h>
+using namespace std;
+
+const int N = 8;
+int board[N];
+int stateCount = 0;
+
+/* ================= PRINT CURRENT STATE ================= */
+void printState(int uptoRow) {
+    cout << "\nState " << ++stateCount << ":\n";
+    for (int r = 0; r < N; r++) {
+        for (int c = 0; c < N; c++) {
+            if (r <= uptoRow && board[r] == c)
+                cout << "Q ";
+            else
+                cout << ". ";
+        }
+        cout << "\n";
+    }
+}
+
+/* ================= PRINT FINAL SOLUTION ================= */
+void printSolution() {
+    cout << "\n===== FINAL SOLUTION =====\n";
+    for (int r = 0; r < N; r++) {
+        for (int c = 0; c < N; c++) {
+            cout << (board[r] == c ? "Q " : ". ");
+        }
+        cout << "\n";
+    }
+}
+
+/* ================= CONSTRAINT CHECK ================= */
+bool isSafe(int row, int col) {
+    for (int i = 0; i < row; i++) {
+        if (board[i] == col) return false;                       // same column
+        if (abs(board[i] - col) == abs(i - row)) return false;   // diagonal
+    }
+    return true;
+}
+
+/* ================= CSP BACKTRACKING ================= */
+bool solveCSP(int row) {
+
+    if (row == N)
+        return true;   // all queens placed
+
+    for (int col = 0; col < N; col++) {
+        if (isSafe(row, col)) {
+            board[row] = col;     // assign
+            printState(row);      // print every state explored
+
+            if (solveCSP(row + 1))
+                return true;
+        }
+    }
+    return false;  // backtrack
+}
+
+/* ================= MAIN ================= */
+int main() {
+    if (solveCSP(0)) {
+        printSolution();
+    } else {
+        cout << "No solution found\n";
+    }
+
+    cout << "\nTotal States Explored = " << stateCount << endl;
+    return 0;
+}
+
+Routing 
+//2
+#include <bits/stdc++.h>
+using namespace std;
+
+const int ROWS = 5;
+const int COLS = 5;
+
+// 0 = free, 1 = obstacle
+int grid[ROWS][COLS] = {
+    {0, 0, 0, 0, 0},
+    {1, 1, 0, 1, 0},
+    {0, 0, 0, 1, 0},
+    {0, 1, 1, 0, 0},
+    {0, 0, 0, 0, 0}
+};
+
+int dx[4] = {-1, 1, 0, 0};
+int dy[4] = {0, 0, -1, 1};
+
+struct Node {
+    int x, y;
+    int g, h;
+    vector<pair<int,int>> path;
+};
+
+/* ================= HEURISTIC ================= */
+int heuristic(int x, int y, int gx, int gy) {
+    return abs(x - gx) + abs(y - gy);
+}
+
+/* ================= PRINT PATH ================= */
+void printPath(vector<pair<int,int>> &path) {
+    for (auto &p : path)
+        cout << "(" << p.first << "," << p.second << ") -> ";
+    cout << "GOAL\n";
+}
+
+/* ================= BEST FIRST SEARCH ================= */
+void BestFirst(int sx, int sy, int gx, int gy) {
+    cout << "\n===== BEST FIRST SEARCH =====\n";
+
+    auto cmp = [](Node a, Node b) {
+        return a.h > b.h;   // f(n) = h(n)
+    };
+
+    priority_queue<Node, vector<Node>, decltype(cmp)> pq(cmp);
+    bool visited[ROWS][COLS] = {false};
+
+    pq.push({sx, sy, 0, heuristic(sx,sy,gx,gy), {{sx,sy}}});
+
+    while(!pq.empty()) {
+        Node cur = pq.top(); pq.pop();
+
+        if (visited[cur.x][cur.y]) continue;
+        visited[cur.x][cur.y] = true;
+
+        if (cur.x == gx && cur.y == gy) {
+            cout << "Path (Greedy):\n";
+            printPath(cur.path);
+            return;
+        }
+
+        for(int i = 0; i < 4; i++) {
+            int nx = cur.x + dx[i];
+            int ny = cur.y + dy[i];
+
+            if(nx>=0 && ny>=0 && nx<ROWS && ny<COLS &&
+               grid[nx][ny]==0 && !visited[nx][ny]) {
+
+                auto p = cur.path;
+                p.push_back({nx,ny});
+                pq.push({nx, ny, 0, heuristic(nx,ny,gx,gy), p});
+            }
+        }
+    }
+    cout << "No path found.\n";
+}
+
+/* ================= A* SEARCH ================= */
+void AStar(int sx, int sy, int gx, int gy) {
+    cout << "\n===== A* SEARCH =====\n";
+
+    auto cmp = [](Node a, Node b) {
+        return (a.g + a.h) > (b.g + b.h);
+    };
+
+    priority_queue<Node, vector<Node>, decltype(cmp)> pq(cmp);
+    bool closed[ROWS][COLS] = {false};
+
+    pq.push({sx, sy, 0, heuristic(sx,sy,gx,gy), {{sx,sy}}});
+
+    while(!pq.empty()) {
+        Node cur = pq.top(); pq.pop();
+
+        if (closed[cur.x][cur.y]) continue;
+        closed[cur.x][cur.y] = true;
+
+        if (cur.x == gx && cur.y == gy) {
+            cout << "Optimal Path:\n";
+            printPath(cur.path);
+            cout << "Total Cost = " << cur.g << endl;
+            return;
+        }
+
+        for(int i = 0; i < 4; i++) {
+            int nx = cur.x + dx[i];
+            int ny = cur.y + dy[i];
+
+            if(nx>=0 && ny>=0 && nx<ROWS && ny<COLS &&
+               grid[nx][ny]==0 && !closed[nx][ny]) {
+
+                auto p = cur.path;
+                p.push_back({nx,ny});
+                pq.push({nx, ny, cur.g+1,
+                         heuristic(nx,ny,gx,gy), p});
+            }
+        }
+    }
+    cout << "No path found.\n";
+}
+
+/* ================= MAIN ================= */
+int main() {
+    int sx = 0, sy = 0;
+    int gx = 4, gy = 4;
+
+    BestFirst(sx, sy, gx, gy);
+    AStar(sx, sy, gx, gy);
+
+    return 0;
+}
+
+
+//2
+#include <bits/stdc++.h>
+using namespace std;
+
+/* ================= Heuristic (SLD) ================= */
+unordered_map<string,int> h;
+
+/* ================= Graph ================= */
+unordered_map<string, unordered_map<string,int>> g;
+
+void addEdge(string u, string v, int cost){
+    g[u][v] = cost;
+    g[v][u] = cost;
+}
+
+/* ================= Node Structure ================= */
+struct Node {
+    string city;
+    int gCost;   // cost from start
+    int fCost;   // evaluation
+
+    Node(string c, int g, int f){
+        city = c;
+        gCost = g;
+        fCost = f;
+    }
+};
+
+/* ================= BEST FIRST SEARCH ================= */
+void BestFirstSearch(string start, string goal){
+    cout << "\n===== BEST FIRST SEARCH =====\n";
+
+    auto cmp = [](Node a, Node b){
+        return a.fCost > b.fCost;     // f = h
+    };
+
+    priority_queue<Node, vector<Node>, decltype(cmp)> pq(cmp);
+    unordered_set<string> visited;
+    unordered_map<string,string> parent;
+
+    pq.push(Node(start, 0, h[start]));
+    parent[start] = "";
+
+    while(!pq.empty()){
+        Node cur = pq.top(); pq.pop();
+
+        if(visited.count(cur.city)) continue;
+        visited.insert(cur.city);
+
+        if(cur.city == goal){
+            vector<string> path;
+            string c = goal;
+            while(c != ""){
+                path.push_back(c);
+                c = parent[c];
+            }
+            reverse(path.begin(), path.end());
+
+            cout << "Path: ";
+            for(auto &x : path) cout << x << " ";
+            cout << "\n(Note: Cost may NOT be optimal)\n";
+            return;
+        }
+
+        for(auto &nbr : g[cur.city]){
+            if(!visited.count(nbr.first)){
+                parent[nbr.first] = cur.city;
+                pq.push(Node(nbr.first, 0, h[nbr.first]));
+            }
+        }
+    }
+}
+
+/* ================= A* SEARCH ================= */
+void AStarSearch(string start, string goal){
+    cout << "\n===== A* SEARCH =====\n";
+
+    auto cmp = [](Node a, Node b){
+        return a.fCost > b.fCost;   // f = g + h
+    };
+
+    priority_queue<Node, vector<Node>, decltype(cmp)> pq(cmp);
+    unordered_map<string,int> dist;
+    unordered_map<string,string> parent;
+    unordered_set<string> visited;
+
+    pq.push(Node(start, 0, h[start]));
+    dist[start] = 0;
+    parent[start] = "";
+
+    while(!pq.empty()){
+        Node cur = pq.top(); pq.pop();
+
+        if(visited.count(cur.city)) continue;
+        visited.insert(cur.city);
+
+        if(cur.city == goal){
+            vector<string> path;
+            string c = goal;
+            while(c != ""){
+                path.push_back(c);
+                c = parent[c];
+            }
+            reverse(path.begin(), path.end());
+
+            cout << "Path: ";
+            for(auto &x : path) cout << x << " ";
+            cout << "\nOptimal Cost = " << cur.gCost << endl;
+            return;
+        }
+
+        for(auto &nbr : g[cur.city]){
+            int newG = cur.gCost + nbr.second;
+            if(!dist.count(nbr.first) || newG < dist[nbr.first]){
+                dist[nbr.first] = newG;
+                parent[nbr.first] = cur.city;
+                pq.push(Node(nbr.first, newG, newG + h[nbr.first]));
+            }
+        }
+    }
+}
+
+/* ================= MAIN ================= */
+int main(){
+
+    /* -------- Heuristic Values -------- */
+    h["Arad"]=366; h["Bucharest"]=0; h["Craiova"]=160;
+    h["Drobeta"]=242; h["Eforie"]=161; h["Fagaras"]=176;
+    h["Giurgiu"]=77; h["Hirsova"]=151; h["Iasi"]=226;
+    h["Lugoj"]=244; h["Mehadia"]=241; h["Neamt"]=234;
+    h["Oradea"]=380; h["Pitesti"]=100; h["RimnicuVilcea"]=193;
+    h["Sibiu"]=253; h["Timisoara"]=329; h["Urziceni"]=80;
+    h["Vaslui"]=199; h["Zerind"]=374;
+
+    /* -------- Graph Edges -------- */
+    addEdge("Arad","Zerind",75);
+    addEdge("Arad","Sibiu",140);
+    addEdge("Arad","Timisoara",118);
+    addEdge("Zerind","Oradea",71);
+    addEdge("Oradea","Sibiu",151);
+    addEdge("Timisoara","Lugoj",111);
+    addEdge("Lugoj","Mehadia",70);
+    addEdge("Mehadia","Drobeta",75);
+    addEdge("Drobeta","Craiova",120);
+    addEdge("Craiova","RimnicuVilcea",146);
+    addEdge("Craiova","Pitesti",138);
+    addEdge("RimnicuVilcea","Sibiu",80);
+    addEdge("RimnicuVilcea","Pitesti",97);
+    addEdge("Sibiu","Fagaras",99);
+    addEdge("Fagaras","Bucharest",211);
+    addEdge("Pitesti","Bucharest",101);
+
+    string start = "Arad";
+    string goal  = "Bucharest";
+
+    BestFirstSearch(start, goal);
+    AStarSearch(start, goal);
+
+    return 0;
+}
+
+Graph - coloring
+#include <bits/stdc++.h>
+using namespace std;
+
+const int N = 4;     // number of vertices
+const int M = 3;     // number of colors
+
+int graph[N][N] = {
+    {0, 1, 1, 1},
+    {1, 0, 1, 0},
+    {1, 1, 0, 1},
+    {1, 0, 1, 0}
+};
+
+int color[N];        // color[i] = color index of vertex i
+int states = 0;
+
+string colorName[M+1] = {"", "Red", "Green", "Blue"};
+
+/* ================= PRINT CURRENT STATE ================= */
+void printState(int uptoVertex) {
+    cout << "State " << states << ": ";
+    for (int i = 0; i <= uptoVertex; i++) {
+        cout << "V" << i << "=" << colorName[color[i]] << "  ";
+    }
+    cout << endl;
+}
+
+/* ================= SAFETY CHECK ================= */
+bool isSafe(int v, int c) {
+    for (int i = 0; i < N; i++) {
+        if (graph[v][i] && color[i] == c)
+            return false;
+    }
+    return true;
+}
+
+/* ================= BACKTRACKING ================= */
+bool solve(int v) {
+    states++;
+
+    if (v == N)
+        return true;
+
+    for (int c = 1; c <= M; c++) {
+        if (isSafe(v, c)) {
+            color[v] = c;
+            printState(v);     // PRINT TRAVERSAL STATE
+
+            if (solve(v + 1))
+                return true;
+
+            color[v] = 0;      // BACKTRACK
+        }
+    }
+    return false;
+}
+
+/* ================= PRINT FINAL SOLUTION ================= */
+void printSolution() {
+    cout << "\n===== FINAL SOLUTION =====\n";
+    for (int i = 0; i < N; i++) {
+        cout << "Vertex " << i << " -> " << colorName[color[i]] << endl;
+    }
+}
+
+/* ================= MAIN ================= */
+int main() {
+    memset(color, 0, sizeof(color));
+
+    if (solve(0)) {
+        printSolution();
+    } else {
+        cout << "No solution exists\n";
+    }
+
+    cout << "\nTotal States Explored = " << states << endl;
+    return 0;
+}
+
