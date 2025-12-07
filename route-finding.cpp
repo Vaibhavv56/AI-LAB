@@ -157,3 +157,138 @@ int main(){
 
     return 0;
 }
+
+
+
+
+//2
+#include <bits/stdc++.h>
+using namespace std;
+
+const int ROWS = 5;
+const int COLS = 5;
+
+// 0 = free, 1 = obstacle
+int grid[ROWS][COLS] = {
+    {0, 0, 0, 0, 0},
+    {1, 1, 0, 1, 0},
+    {0, 0, 0, 1, 0},
+    {0, 1, 1, 0, 0},
+    {0, 0, 0, 0, 0}
+};
+
+int dx[4] = {-1, 1, 0, 0};
+int dy[4] = {0, 0, -1, 1};
+
+struct Node {
+    int x, y;
+    int g, h;
+    vector<pair<int,int>> path;
+};
+
+/* ================= HEURISTIC ================= */
+int heuristic(int x, int y, int gx, int gy) {
+    return abs(x - gx) + abs(y - gy);
+}
+
+/* ================= PRINT PATH ================= */
+void printPath(vector<pair<int,int>> &path) {
+    for (auto &p : path)
+        cout << "(" << p.first << "," << p.second << ") -> ";
+    cout << "GOAL\n";
+}
+
+/* ================= BEST FIRST SEARCH ================= */
+void BestFirst(int sx, int sy, int gx, int gy) {
+    cout << "\n===== BEST FIRST SEARCH =====\n";
+
+    auto cmp = [](Node a, Node b) {
+        return a.h > b.h;   // f(n) = h(n)
+    };
+
+    priority_queue<Node, vector<Node>, decltype(cmp)> pq(cmp);
+    bool visited[ROWS][COLS] = {false};
+
+    pq.push({sx, sy, 0, heuristic(sx,sy,gx,gy), {{sx,sy}}});
+
+    while(!pq.empty()) {
+        Node cur = pq.top(); pq.pop();
+
+        if (visited[cur.x][cur.y]) continue;
+        visited[cur.x][cur.y] = true;
+
+        if (cur.x == gx && cur.y == gy) {
+            cout << "Path (Greedy):\n";
+            printPath(cur.path);
+            return;
+        }
+
+        for(int i = 0; i < 4; i++) {
+            int nx = cur.x + dx[i];
+            int ny = cur.y + dy[i];
+
+            if(nx>=0 && ny>=0 && nx<ROWS && ny<COLS &&
+               grid[nx][ny]==0 && !visited[nx][ny]) {
+
+                auto p = cur.path;
+                p.push_back({nx,ny});
+                pq.push({nx, ny, 0, heuristic(nx,ny,gx,gy), p});
+            }
+        }
+    }
+    cout << "No path found.\n";
+}
+
+/* ================= A* SEARCH ================= */
+void AStar(int sx, int sy, int gx, int gy) {
+    cout << "\n===== A* SEARCH =====\n";
+
+    auto cmp = [](Node a, Node b) {
+        return (a.g + a.h) > (b.g + b.h);
+    };
+
+    priority_queue<Node, vector<Node>, decltype(cmp)> pq(cmp);
+    bool closed[ROWS][COLS] = {false};
+
+    pq.push({sx, sy, 0, heuristic(sx,sy,gx,gy), {{sx,sy}}});
+
+    while(!pq.empty()) {
+        Node cur = pq.top(); pq.pop();
+
+        if (closed[cur.x][cur.y]) continue;
+        closed[cur.x][cur.y] = true;
+
+        if (cur.x == gx && cur.y == gy) {
+            cout << "Optimal Path:\n";
+            printPath(cur.path);
+            cout << "Total Cost = " << cur.g << endl;
+            return;
+        }
+
+        for(int i = 0; i < 4; i++) {
+            int nx = cur.x + dx[i];
+            int ny = cur.y + dy[i];
+
+            if(nx>=0 && ny>=0 && nx<ROWS && ny<COLS &&
+               grid[nx][ny]==0 && !closed[nx][ny]) {
+
+                auto p = cur.path;
+                p.push_back({nx,ny});
+                pq.push({nx, ny, cur.g+1,
+                         heuristic(nx,ny,gx,gy), p});
+            }
+        }
+    }
+    cout << "No path found.\n";
+}
+
+/* ================= MAIN ================= */
+int main() {
+    int sx = 0, sy = 0;
+    int gx = 4, gy = 4;
+
+    BestFirst(sx, sy, gx, gy);
+    AStar(sx, sy, gx, gy);
+
+    return 0;
+}
