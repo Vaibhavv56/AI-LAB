@@ -4,6 +4,7 @@ using namespace std;
 const int N = 4;     // number of vertices
 const int M = 3;     // number of colors
 
+//adjacency matrix
 int graph[N][N] = {
     {0, 1, 1, 1},
     {1, 0, 1, 0},
@@ -48,7 +49,7 @@ bool solve(int v) {
 
             if (solve(v + 1))
                 return true;
-
+            //backtracking step
             color[v] = 0;      // BACKTRACK
         }
     }
